@@ -3,9 +3,23 @@ Heroku Buildpack for Common Lisp
 
 A Buildpack that allows you to deploy Common Lisp applications on the Heroku infrastructure.
 
-Original work by Mike Travers, mt@hyperphor.com
+Original work by Mike Travers, mt@hyperphor.com and was improved by José Pereira, jsmpereira@gmail.com.
+
+## Usage
+
+Your app should include a file by name `heroku-setup.lisp`. This shall be reponsible for loading
+your application. You server should not be started during loading of this file.
+
+This builds a binary image of your applicaiton which will be run to start your application. It
+invokes `heroku-toplevel` (of `cl-user` package) on startup, for which a default implementation
+is provided. This function is responsible for starting your server. To coustomise it for your
+application you can redefine the function. This function should not return.
 
 ## Changes 
+* User rosewell to install sbcl/ccl.
+
+> Was inspire from https://github.com/Rudolph-Miller/heroku-buildpack-clack
+
 * Support for SBCL and Hunchentoot.
 
 > Example app at https://github.com/jsmpereira/heroku-cl-example
