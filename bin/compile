@@ -40,22 +40,57 @@ fi
 
 echo "-----> CL_IMPL: $CL_IMPL"
 
+USR_DIR=$CACHE_DIR/usr
+
+ROSWELL_DIR=$CL_DIR/roswell
+ROSWELL_REPO=https://github.com/snmsts/roswell.git
+ROSWELL_BR=master
+
+ROS_COMMAND=$USR_DIR/bin/ros
+
+if [ ! -f $ROS_COMMAND ]; then
+  mkdir -p $USR_DIR
+  mkdir -p $USR_DIR/bin
+  mkdir -p $USR_DIR/lib
+  mkdir -p $CL_DIR
+
+  echo "-----> ROSWELL"
+  cd $CL_DIR
+
+  echo "-----> ROSWELL: DOWNLOAD"
+  git clone -b $ROSWELL_BR $ROSWELL_REPO --depth 1 1>/dev/null
+
+  echo "-----> ROSWELL: BOOTSTRAP"
+  cd $ROSWELL_DIR
+  sh bootstrap 1>/dev/null
+  ./configure --prefix=$USR_DIR 1>/dev/null
+
+  echo "-----> ROSWELL: MAKE"
+  make 1>/dev/null
+
+  echo "-----> ROSWELL: MAKE INSTALL"
+  make install 1>/dev/null
+
+  echo "-----> ROSWELL: SETUP"
+  $ROS_COMMAND setup 1>/dev/null
+else
+  echo "-----> ROSWELL ALREADY SETUP"
+fi
+
 case $CL_IMPL in
   sbcl)
-    S3_BUCKET="sbcl-heroku"
-    CL_PACKAGE="https://s3.amazonaws.com/${S3_BUCKET}/sbcl-1.2.13-x86-64-linux-binary.tar.bz2"
-    DECOMPRESS="tar jxvf - -C $CL_DIR"
+    $ROS_COMMAND install sbcl-bin 1>/dev/null
     ;;
   ccl)
-    S3_BUCKET="cl-heroku"
-    CL_PACKAGE="http://${S3_BUCKET}.s3.amazonaws.com/ccl-1.7.tgz"
-    DECOMPRESS="tar xzf - -C $CL_DIR"
+    $ROS_COMMAND install sbcl-bin 1>/dev/null
     export CCL_DEFAULT_DIRECTORY=$CL_DIR # overwrite CCL_DEFAULT_DIRECTORY on ccl64
     ;;
   *)
     echo "-----> ! Please set CL_IMPL: heroku config:add CL_IMPL={sbcl|ccl}."
     exit 1
 esac
+
+echo "$CL_IMPL installed" | indent
 
 echo "-----> CL_WEBSERVER: $CL_WEBSERVER"
 
@@ -94,26 +129,12 @@ case $CL_WEBSERVER in
     exit 1
 esac
 
-echo "-----> Installing $CL_IMPL"
-if [ ! -d $CL_DIR ]; then
-    echo "-----> Fetching $CL_IMPL"
-    mkdir -p $CL_DIR  && curl $CL_PACKAGE -s -o -  | $DECOMPRESS
-fi
-
-# add to slug
-cp -r $CL_DIR $BUILD_DIR
-
-echo "$CL_IMPL installed" | indent
-
 export BUILDPACK_DIR
 export CACHE_DIR
 export BUILD_DIR
 
 echo "-----> Starting build"
-case $CL_IMPL in
-  sbcl) sh $CL_DIR/sbcl-1.2.13-x86-64-linux/run-sbcl.sh --load "$BUILDPACK_DIR/setup/compile.lisp";;
-  ccl) $CCL_DEFAULT_DIRECTORY/scripts/ccl64 -l "$BUILDPACK_DIR/setup/compile.lisp";;
-esac
+$ROS_COMMAND --load "$BUILDPACK_DIR/setup/compile.lisp"
 echo "-----> Build finished"
 
 chmod a+x $BUILD_DIR/lispapp
