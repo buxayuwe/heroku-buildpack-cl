@@ -7,13 +7,13 @@ Original work by Mike Travers, mt@hyperphor.com and was improved by José Pereir
 
 ## Usage
 
-Your app should include a file by name `heroku-setup.lisp`. This shall be reponsible for loading
-your application. You server should not be started during loading of this file.
+This builds a binary image of your applicaiton which will be run to start your application.Your
+app should include a file by the name `heroku-setup.lisp`. It is be reponsible for loading
+your application. But, do note that your server should not be started during loading of this file.
 
-This builds a binary image of your applicaiton which will be run to start your application. It
-invokes `heroku-toplevel` (of `cl-user` package) on startup, for which a default implementation
-is provided. This function is responsible for starting your server. To coustomise it for your
-application you can redefine the function. This function should not return.
+The binary invokes `heroku-toplevel` (of `cl-user` package) on startup, for which a default
+implementation has been provided. This function is expected to _start your server_ and **should not
+return**. You should redefine the function to suite your needs.
 
 ## Changes 
 * User rosewell to install sbcl/ccl.
