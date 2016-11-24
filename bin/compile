@@ -82,7 +82,7 @@ case $CL_IMPL in
     $ROS_COMMAND install sbcl-bin 1>/dev/null
     ;;
   ccl)
-    $ROS_COMMAND install sbcl-bin 1>/dev/null
+    $ROS_COMMAND install ccl-bin 1>/dev/null
     export CCL_DEFAULT_DIRECTORY=$CL_DIR # overwrite CCL_DEFAULT_DIRECTORY on ccl64
     ;;
   *)
