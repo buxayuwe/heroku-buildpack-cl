@@ -46,6 +46,8 @@ ROSWELL_DIR=$CL_DIR/roswell
 ROSWELL_REPO=https://github.com/snmsts/roswell.git
 ROSWELL_BR=master
 
+export ROSWELL_HOME=$CL_DIR/ros_home
+
 ROS_COMMAND=$USR_DIR/bin/ros
 
 if [ ! -f $ROS_COMMAND ]; then
@@ -53,6 +55,7 @@ if [ ! -f $ROS_COMMAND ]; then
   mkdir -p $USR_DIR/bin
   mkdir -p $USR_DIR/lib
   mkdir -p $CL_DIR
+  mkdir -p $ROSWELL_HOME
 
   echo "-----> ROSWELL"
   cd $CL_DIR
